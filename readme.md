@@ -1,3 +1,6 @@
+** Go Data Fifa Provider**
+Study case for Go, an API to retrieve Fifa championships information
+
 Requirements:
 
 Gorilla mux
@@ -13,4 +16,4 @@ To run the project:
 docker-compose up
 
 docker ps -a
-docker inspect acf | grep IPAddress -- 172.19.0.2
+docker inspect acf | grep IPAddress
