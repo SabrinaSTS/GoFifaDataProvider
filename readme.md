@@ -1,7 +1,9 @@
-** Go Data Fifa Provider**
+## Go Data Fifa Provider
 Study case for Go, an API to retrieve Fifa championships information
 
-Requirements:
+----
+
+### Requirements:
 
 Gorilla mux
 go get -u github.com/gorilla/mux
@@ -12,7 +14,9 @@ go get gorm.io/driver/postgres
 GORM
 go get -u gorm.io/gorm
 
-To run the project:
+
+----
+### How to run:
 docker-compose up
 
 docker ps -a
