@@ -126,9 +126,8 @@ func GetParticipation(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Got Participation")
 }
 
-// erro
 func CreateParticipation(w http.ResponseWriter, r *http.Request) {
-	var participations []models.Participation
+	var participations models.Participation
 	json.NewDecoder(r.Body).Decode(&participations)
 	fmt.Println(participations)
 	database.DB.Create(&participations)
@@ -137,12 +136,13 @@ func CreateParticipation(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateParticipation(w http.ResponseWriter, r *http.Request) {
-	var participations []models.Participation
+	var participations models.Participation
 	vars := mux.Vars(r)
 	id := vars["Id"]
 
 	database.DB.First(&participations, id)
 	json.NewDecoder(r.Body).Decode(&participations)
+	fmt.Println(participations)
 
 	database.DB.Save(&participations)
 	json.NewEncoder(w).Encode(participations)
@@ -150,11 +150,84 @@ func UpdateParticipation(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteParticipation(w http.ResponseWriter, r *http.Request) {
-	var participations []models.Participation
+	var participations models.Participation
 	vars := mux.Vars(r)
 	id := vars["Id"]
 
 	database.DB.Delete(&participations, id)
 	json.NewEncoder(w).Encode(participations)
 	fmt.Println("Participation Deleted")
+}
+
+type resultParticipationByTeam struct {
+	NationalTeamName string         `json:"national_team"`
+	Events           []models.Event `json:"event_participations"`
+}
+
+func GetParticipationByTeam(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	teamName := vars["TeamName"]
+	var team models.NationalTeam
+	database.DB.Find(&team, "country = ?", teamName)
+	fmt.Println("Got National Team")
+	fmt.Println(team)
+
+	var participations []models.Participation
+	database.DB.Find(&participations, "team_id = ?", team.Id)
+	fmt.Println("Got Participations")
+	fmt.Println(participations)
+
+	var events []models.Event
+	for i := range participations {
+		id := participations[i].Event_id
+		var event models.Event
+		database.DB.First(&event, id)
+		events = append(events, event)
+	}
+
+	fmt.Println("Events Found")
+	fmt.Println(events)
+
+	var result resultParticipationByTeam
+	result.NationalTeamName = teamName
+	result.Events = events
+	fmt.Println("Result for team:", result)
+
+	json.NewEncoder(w).Encode(result)
+}
+
+type resulParticipationByEventYear struct {
+	EventName     string   `json:"event_name"`
+	EventYear     string   `json:"event_year"`
+	NationalTeams []string `json:"national_teams"`
+}
+
+func GetParticipationByEventYear(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	year := vars["Year"]
+
+	var event models.Event
+	database.DB.First(&event, "year = ?", year)
+	fmt.Println("Event Found")
+
+	var participations []models.Participation
+	database.DB.Find(&participations, "event_id = ?", event.Id)
+	fmt.Println("Got Event")
+	fmt.Println(event)
+
+	var teams []string
+	for i := range participations {
+		id := participations[i].Team_id
+		var team models.NationalTeam
+		database.DB.First(&team, id)
+		teams = append(teams, team.Country)
+	}
+
+	var result resulParticipationByEventYear
+	result.EventName = event.Name
+	result.EventYear = event.Year
+	result.NationalTeams = teams
+
+	json.NewEncoder(w).Encode(result)
+
 }
