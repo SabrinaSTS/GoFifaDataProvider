@@ -21,3 +21,5 @@ go run .
 The project is just a study and some points can be improved in the future.
 - Tests
 - Documentation
+- Better use Gorm lib
+- user of enviroment variables
